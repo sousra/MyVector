@@ -1,5 +1,5 @@
 #include <iostream>
-#include <cassert>
+#include <exception>
 
 #include "MyVector.h"
 
@@ -105,20 +105,25 @@ MyVector& MyVector::operator=(MyVector&& other) noexcept {
         other._size = 0;
         other._capacity = 0;
         other._data = nullptr;
-        return *this;
     }
+    return *this;
 }
+
 MyVector::~MyVector() {
     delete[] _data;
 }
 
 ValueType& MyVector::at(size_t idx) {
-    assert(idx < size());
+    if (idx < 0 || idx >= _size) {
+        throw std::out_of_range("Invalid index");
+    }
     return _data[idx];
 }
 
 const ValueType& MyVector::at(size_t idx) const {
-    assert(idx < size());
+    if (idx < 0 || idx >= _size) {
+        throw std::out_of_range("Invalid index");
+    }
     return _data[idx];
 }
 
@@ -141,6 +146,9 @@ void MyVector::insert(Iterator pos, const ValueType& value) {
 }
 
 void MyVector::insert(size_t idx, const ValueType& value) {
+    if (idx < 0 || idx > _size) {
+        throw std::out_of_range("Invalid index");
+    }
     if (_size + 1 > _capacity) {
         size_t newCapacity;
         if (_resizeStrategy == ResizeStrategy::Additive) {
@@ -177,6 +185,9 @@ void MyVector::erase(Iterator pos, size_t len) {
 }
 
 void MyVector::erase(size_t idx, size_t len) {
+    if (idx < 0 || idx >= _size) {
+        throw std::out_of_range("Invalid index");
+    }
     len = (len > _size - idx) ? _size - idx : len;
     for (; idx < _size - len; ++idx) {
         _data[idx] = _data[idx + len];
@@ -185,7 +196,9 @@ void MyVector::erase(size_t idx, size_t len) {
 }
 
 void MyVector::popBack() {
-    assert(_size > 0);
+    if (_size == 0) {
+        throw std::logic_error("Empty vector");
+    }
     --_size;
 }
 
@@ -240,10 +253,16 @@ void MyVector::shrinkToFit() {
 }
 
 ValueType& MyVector::front() const noexcept {
+    if (_size == 0) {
+        throw std::logic_error("Empty vector");
+    }
     return _data[0];
 }
 
 ValueType& MyVector::back() const noexcept {
+    if (_size == 0) {
+        throw std::logic_error("Empty vector");
+    }
     return _data[_size - 1];
 }
 
